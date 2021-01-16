@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:15432/ledger-accounting
+    pool:
+      enabled: true
+      initial-size: 10
+    username: postgres
+
+  liquibase:
+    url: jdbc:postgresql://localhost:15432/ledger-accounting
+    user: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:15432/ledger-accounting
+    username: postgres
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9494/auth/realms/t1
+          jwk-set-uri: http://localhost:9494/auth/realms/t1/protocol/openid-connect/certs

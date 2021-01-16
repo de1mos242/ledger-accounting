@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Ledger Accounting API
+  version: 0.0.1
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/accounting/user/info:
+    get:
+      summary: Get info about current user.
+      operationId: getUserInfo
+      tags:
+        - users
+      responses:
+        '200':
+          description: Information about current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+
+components:
+  schemas:
+    UserInfo:
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
