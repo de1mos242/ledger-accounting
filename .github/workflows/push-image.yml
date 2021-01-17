@@ -1,0 +1,45 @@
+name: Deploy image
+
+on:
+  push:
+    tags: [v*]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
+
+    - name: Build image
+      run: ./gradlew bootBuildImage -PprojVersion=${{ env.RELEASE_VERSION }} --imageName=de1m0s/ledger-accounting
+
+    - name: login to docker hub
+      env:
+        DOCKER_TOKEN: ${{ secrets.DOCKER_HUB_SECRET }}
+      run: echo "$DOCKER_TOKEN" | docker login --username de1m0s --password-stdin
+
+    - name: tag image
+      run: docker tag de1m0s/ledger-accounting de1m0s/ledger-accounting:${{ env.RELEASE_VERSION }}
+
+    - name: Publish image to dockerhub
+      run: docker push de1m0s/ledger-accounting
+
+  notify_deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
+
+    - name: Send event to deploy service
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: de1mos242/ledger-root
+        event-type: ledger-accounting-released
+        client-payload: '{"version": "${{ env.RELEASE_VERSION }}"}'
