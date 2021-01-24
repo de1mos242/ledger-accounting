@@ -11,12 +11,10 @@ import reactor.core.publisher.Mono
 @RestController
 class UserController(private val userService: UserService) : UsersApi {
     override fun getUserInfo(exchange: ServerWebExchange): Mono<ResponseEntity<UserInfo>> {
-        return userService.getUserInfo(exchange).flatMap {
-            Mono.just(
-                ResponseEntity.ok(
-                    UserInfo()
-                        .email(it.email).firstName(it.firstName).lastName(it.lastName).id(it.id)
-                )
+        return userService.getOrRegisterUser(exchange).map {
+            ResponseEntity.ok(
+                UserInfo()
+                    .email(it.email).firstName(it.firstName).lastName(it.lastName).id(it.externalUUID.toString())
             )
         }
     }
