@@ -61,7 +61,7 @@ class UserService(
                     accountingProcessor.a2uEventOutput().send(
                         MessageBuilder.withPayload(
                             User2AccountMessage(savedUser.externalUUID, savedAccount.externalUUID)
-                        ).build()
+                        ).setHeader(PARTITION_KEY_NAME, savedAccount.externalUUID).build()
                     )
                 }
                 .thenReturn(it.t1)

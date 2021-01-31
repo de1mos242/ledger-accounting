@@ -7,6 +7,9 @@ spring:
       bindings:
         a2u_event:
           destination: a2u_link_event
+          producer:
+            partitioned: true
+            partition-key-expression: headers['partitionKey']
 
   data:
     r2dbc:

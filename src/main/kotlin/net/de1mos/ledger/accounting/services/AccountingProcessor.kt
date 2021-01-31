@@ -6,6 +6,8 @@ import java.util.*
 
 data class User2AccountMessage(val userUUID: UUID, val accountUUID: UUID)
 
+const val PARTITION_KEY_NAME = "partitionKey"
+
 interface AccountingProcessor {
 
     @Output("a2u_event")
