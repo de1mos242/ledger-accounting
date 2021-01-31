@@ -8,8 +8,11 @@ spring:
         a2u_event:
           destination: a2u_link_event
           producer:
-            partitioned: true
             partition-key-expression: headers['partitionKey']
+            partition-count: 50
+      kafka:
+        binder:
+          auto-add-partitions: true
 
   data:
     r2dbc:
