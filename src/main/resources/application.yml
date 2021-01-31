@@ -2,10 +2,22 @@ server:
   port: 8082
 
 spring:
+  cloud:
+    stream:
+      bindings:
+        a2u_event:
+          destination: a2u_link_event
+
   data:
     r2dbc:
       repositories:
         enabled: true
+
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: localhost:9094
 
   r2dbc:
     url: r2dbc:postgresql://localhost:15432/ledger-accounting

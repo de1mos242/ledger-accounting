@@ -7,6 +7,7 @@ import net.de1mos.ledger.accounting.models.Account
 import net.de1mos.ledger.accounting.models.Account2User
 import net.de1mos.ledger.accounting.models.TokenInfo
 import net.de1mos.ledger.accounting.models.User
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
@@ -19,7 +20,8 @@ import java.util.*
 class UserService(
     private val userRepository: UserRepository,
     private val accountRepository: AccountRepository,
-    private val account2UserRepository: Account2UserRepository
+    private val account2UserRepository: Account2UserRepository,
+    private val accountingProcessor: AccountingProcessor
 ) {
 
     fun getOrRegisterUser(exchange: ServerWebExchange): Mono<User> {
@@ -53,7 +55,16 @@ class UserService(
         val account = Account("default", UUID.randomUUID())
         val saveMain = userRepository.save(user).zipWith(accountRepository.save(account))
         return saveMain.flatMap {
-            account2UserRepository.save(Account2User(accountId = it.t2.id!!, userId = it.t1.id!!)).thenReturn(it.t1)
+            val (savedUser, savedAccount) = it.t1 to it.t2
+            account2UserRepository.save(Account2User(accountId = savedAccount.id!!, userId = savedUser.id!!))
+                .map {
+                    accountingProcessor.a2uEventOutput().send(
+                        MessageBuilder.withPayload(
+                            User2AccountMessage(savedUser.externalUUID, savedAccount.externalUUID)
+                        ).build()
+                    )
+                }
+                .thenReturn(it.t1)
         }
 
     }
