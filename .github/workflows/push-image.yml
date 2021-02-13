@@ -25,7 +25,7 @@ jobs:
       run: docker tag de1m0s/ledger-accounting de1m0s/ledger-accounting:${{ env.RELEASE_VERSION }}
 
     - name: Publish image to dockerhub
-      run: docker push de1m0s/ledger-accounting
+      run: docker push de1m0s/ledger-accounting:${{ env.RELEASE_VERSION }}
 
   notify_deploy:
     runs-on: ubuntu-latest
