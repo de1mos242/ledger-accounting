@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"
+>
+    <changeSet id="add_a2u_events" author="dyakovlev">
+        <createTable tableName="a2u_events">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_uuid" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_uuid" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="a2u_events" indexName="a2u_events_account_user_unique_idx" unique="true">
+            <column name="user_uuid"/>
+            <column name="account_uuid"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

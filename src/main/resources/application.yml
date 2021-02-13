@@ -10,21 +10,27 @@ spring:
           producer:
             partition-key-expression: headers['partitionKey']
             partition-count: 50
+        debug_event_name:
+          destination: debug_event
+          producer:
+            partition-key-expression: headers['partitionKey']
+            partition-count: 50
       kafka:
         binder:
           auto-add-partitions: true
           replication-factor: 1
-
-  data:
-    r2dbc:
-      repositories:
-        enabled: true
 
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     bootstrap-servers: localhost:9094
+
+  data:
+    r2dbc:
+      repositories:
+      enabled: true
+
 
   r2dbc:
     url: r2dbc:postgresql://localhost:15432/ledger-accounting

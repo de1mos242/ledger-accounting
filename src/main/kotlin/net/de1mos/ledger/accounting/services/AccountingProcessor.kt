@@ -12,4 +12,7 @@ interface AccountingProcessor {
 
     @Output("a2u_event")
     fun a2uEventOutput(): MessageChannel
+
+    @Output("debug_event_name")
+    fun debugOutput(): MessageChannel
 }

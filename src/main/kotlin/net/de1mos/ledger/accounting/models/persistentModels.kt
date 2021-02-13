@@ -27,3 +27,10 @@ data class Account2User(
     @Column("user_id") var userId: Long,
     @Id @Column("id") var id: Long? = null
 )
+
+@Table("a2u_events")
+data class Account2UserEvent(
+    @Column("account_uuid") var accountUUID: UUID,
+    @Column("user_uuid") var userUUID: UUID,
+    @Id @Column("id") var id: Long? = null
+)

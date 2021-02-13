@@ -1,10 +1,12 @@
 package net.de1mos.ledger.accounting.services
 
+import net.de1mos.ledger.accounting.Account2UserEventRepository
 import net.de1mos.ledger.accounting.Account2UserRepository
 import net.de1mos.ledger.accounting.AccountRepository
 import net.de1mos.ledger.accounting.UserRepository
 import net.de1mos.ledger.accounting.models.Account
 import net.de1mos.ledger.accounting.models.Account2User
+import net.de1mos.ledger.accounting.models.Account2UserEvent
 import net.de1mos.ledger.accounting.models.TokenInfo
 import net.de1mos.ledger.accounting.models.User
 import org.springframework.messaging.support.MessageBuilder
@@ -21,12 +23,19 @@ class UserService(
     private val userRepository: UserRepository,
     private val accountRepository: AccountRepository,
     private val account2UserRepository: Account2UserRepository,
+    private val account2UserEventRepository: Account2UserEventRepository,
     private val accountingProcessor: AccountingProcessor
 ) {
 
     fun getOrRegisterUser(exchange: ServerWebExchange): Mono<User> {
         return getTokenInfo(exchange).flatMap { token ->
             userRepository.findByExternalUUID(UUID.fromString(token.id)).switchIfEmpty(registerUser(token))
+        }.doOnNext {
+            accountingProcessor.debugOutput().send(
+                MessageBuilder.withPayload(
+                    User2AccountMessage(it.externalUUID, UUID.randomUUID())
+                ).setHeader(PARTITION_KEY_NAME, it.externalUUID).build()
+            )
         }
     }
 
@@ -57,12 +66,17 @@ class UserService(
         return saveMain.flatMap {
             val (savedUser, savedAccount) = it.t1 to it.t2
             account2UserRepository.save(Account2User(accountId = savedAccount.id!!, userId = savedUser.id!!))
-                .map {
-                    accountingProcessor.a2uEventOutput().send(
-                        MessageBuilder.withPayload(
-                            User2AccountMessage(savedUser.externalUUID, savedAccount.externalUUID)
-                        ).setHeader(PARTITION_KEY_NAME, savedAccount.externalUUID).build()
-                    )
+//                .doOnNext {
+//                    accountingProcessor.a2uEventOutput().send(
+//                        MessageBuilder.withPayload(
+//                            User2AccountMessage(savedUser.externalUUID, savedAccount.externalUUID)
+//                        ).setHeader(PARTITION_KEY_NAME, savedAccount.externalUUID).build()
+//                    )
+//                }
+                .flatMap {
+                    val account2UserEvent =
+                        Account2UserEvent(accountUUID = savedAccount.externalUUID, userUUID = savedUser.externalUUID)
+                    account2UserEventRepository.save(account2UserEvent)
                 }
                 .thenReturn(it.t1)
         }

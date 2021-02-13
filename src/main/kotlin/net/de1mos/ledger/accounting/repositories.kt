@@ -2,6 +2,7 @@ package net.de1mos.ledger.accounting
 
 import net.de1mos.ledger.accounting.models.Account
 import net.de1mos.ledger.accounting.models.Account2User
+import net.de1mos.ledger.accounting.models.Account2UserEvent
 import net.de1mos.ledger.accounting.models.User
 import org.springframework.data.repository.reactive.ReactiveSortingRepository
 import reactor.core.publisher.Mono
@@ -16,5 +17,9 @@ interface AccountRepository: ReactiveSortingRepository<Account, Long> {
 }
 
 interface Account2UserRepository: ReactiveSortingRepository<Account2User, Long> {
+
+}
+
+interface Account2UserEventRepository: ReactiveSortingRepository<Account2UserEvent, Long> {
 
 }
